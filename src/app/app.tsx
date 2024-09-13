@@ -1,2 +1,13 @@
-var abc=1;
-export default abc;
+import React from "react";
+
+class App extends React.Component{
+
+    render(){
+        return (
+            <p>ok</p>
+        )
+    }
+
+}
+
+export default App;
