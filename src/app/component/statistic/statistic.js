@@ -1,4 +1,5 @@
 import React from "react";
+import {isMobile, isDesktop, isTablet} from "react-device-detect"
 
 
 class Statistic extends React.Component{
