@@ -2,13 +2,12 @@ import UltilsString from '../ultils/string_ultils.js';
 import Loading from '../ui/loading.js';
 import Service from '../service/service.js';
 import StorageManager from '../ultils/storageManager.js';
-import KeyStorage from '../ultils/setKeyStorage.js';
 
 class AuthToken {
 
     static authToken=(code, grant_type)=>{
         var game_id=StorageManager.getGameID();
-        const data=JSON.stringify({
+        const data=JSON.stringify({ 
             "client_id": 'CF_PLAYZONE',
             "client_secret":  'a62c89asj3hao5jq9',
             "grant_type": grant_type,
@@ -35,7 +34,7 @@ class AuthToken {
             var user_save = result.data;
             user_save.expired = Date.now();
             StorageManager.setUser(JSON.stringify(user_save))
-            window.location.replace(`${KeyStorage.getOrigin()}${window.location.pathname}${KeyStorage.url_return()}`);
+            window.location.replace(`${StorageManager.getOrigin()}${window.location.pathname}`);
         })
         .catch(error => {
             if(error.response.data.code ===-404){

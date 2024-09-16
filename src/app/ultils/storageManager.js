@@ -54,6 +54,14 @@ class StorageManager{
 		
 	}
 
+	static setOrigin = (origin) => {
+		StorageManager.setValue(`origin`, origin)
+	}
+
+    static getOrigin = () => {
+		return StorageManager.getValue(`origin`)
+	}
+
 	static getCodeByUrl = () => {
 		var gameid=UltilsString.parse_query_string('gameid', window.location.href);
 		return gameid;
