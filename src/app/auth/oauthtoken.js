@@ -1,15 +1,13 @@
-'use strict'
-
 import UltilsString from '../ultils/string_ultils.js';
+import Loading from '../ui/loading.js';
 import Service from '../service/service.js';
-import StorageManager from '../storage/storageManager.js';
+import StorageManager from '../ultils/storageManager.js';
 import KeyStorage from '../ultils/setKeyStorage.js';
 
 class AuthToken {
 
     static authToken=(code, grant_type)=>{
-        // var game_id=StorageManager.getValue('gameid_r')
-        var game_id=KeyStorage.getGameID();
+        var game_id=StorageManager.getGameID();
         const data=JSON.stringify({
             "client_id": 'CF_PLAYZONE',
             "client_secret":  'a62c89asj3hao5jq9',
@@ -22,7 +20,7 @@ class AuthToken {
         var h= {...Service.headers};
         h.appId=game_id;
 
-        var url = UltilsString.base_url()+'/api/v1/account/oauthtoken';
+        var url = UltilsString.base_url()+'/api/v1/account/login';
 
         var requestOptions = {
             method: 'POST',
@@ -36,8 +34,7 @@ class AuthToken {
         .then(result => {
             var user_save = result.data;
             user_save.expired = Date.now();
-            KeyStorage.setUser(JSON.stringify(user_save))
-            // StorageManager.setValue("user_r", JSON.stringify(user_save));
+            StorageManager.setUser(JSON.stringify(user_save))
             window.location.replace(`${KeyStorage.getOrigin()}${window.location.pathname}${KeyStorage.url_return()}`);
         })
         .catch(error => {
@@ -45,8 +42,7 @@ class AuthToken {
                 $('body').html('');
                 $('body').html(`<div style="width: 100%;height: 50px;color: black;text-align: center;padding: 50px;">${error.response.data.message}</div>`);
             }
-            KeyStorage.deleteUser();
-            // StorageManager.deleteItem("user_r");
+            StorageManager.deleteUser();
         });
     }
 }
