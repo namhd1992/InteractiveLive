@@ -24,7 +24,7 @@ class Game extends React.Component{
 	}
 
     componentDidMount(){
-        this.renArr()
+        // this.renArr()
         this.setState({questions: data, currentQuestion:data[0]})
         if(window.innerWidth < window.innerHeight){
 			this.setState({horizontal: false})
@@ -45,13 +45,19 @@ class Game extends React.Component{
     next=()=>{
         const {currentQuestion, questions}=this.state;
         var pos = questions.map(function(e) { return e.id; }).indexOf(currentQuestion.id);
-        this.setState({currentQuestion:questions[pos+1]});
+        if(pos<questions.length-1){
+            this.setState({currentQuestion:questions[pos+1]});
+        }
+        
     }
 
     back=()=>{
         const {currentQuestion, questions}=this.state;
         var pos = questions.map(function(e) { return e.id; }).indexOf(currentQuestion.id);
-        this.setState({currentQuestion:questions[pos-1]});
+        if(pos>0){
+            this.setState({currentQuestion:questions[pos-1]});
+        }
+        
     }
 
     finished=()=>{
@@ -93,7 +99,7 @@ class Game extends React.Component{
 
 
     render(){
-        const {currentQuestion, awsActive}=this.state;
+        const {currentQuestion, awsActive, isBack, isNext}=this.state;
         return (
            <div style={{display:'flex', flexDirection:'row'}}>
                 <div style={{display:'flex', alignContent:'center'}}>{currentQuestion.duration}</div>
@@ -114,7 +120,7 @@ class Game extends React.Component{
                             <span style={{backgroundColor:'green', color:'#fff', fontSize:20, fontWeight:'bold', padding:'7px 15px', marginRight:10, cursor:'pointer'}} onClick={this.back}>Back</span>
                         </div>
                         <div>
-                            <span style={{backgroundColor:'green', color:'#fff', fontSize:20, fontWeight:'bold', padding:'7px 15px', marginRight:10, cursor:'pointer'}} onClick={this.next}>Next</span>
+                            <span style={{backgroundColor:'green', color:'#fff', fontSize:20, fontWeight:'bold', padding:'7px 15px', marginRight:10, cursor:'pointer'}} onClick={this.next} >Next</span>
                         </div>
                         <div>
                             <span style={{backgroundColor:'red', color:'#fff', fontSize:20, fontWeight:'bold', padding:'7px 15px', marginRight:10, cursor:'pointer'}} onClick={this.finished}>Kết thúc ngay</span>
