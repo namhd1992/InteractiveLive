@@ -91,19 +91,35 @@ class Game extends React.Component{
     next=()=>{
         const {currentQuestion, questions, awsActive, userAnswer, answersCurrentSelected}=this.state;
         var pos = questions.map(function(e) { return e.id; }).indexOf(currentQuestion.id);
+        var pos_awsu = userAnswer.map(function(e) { return e.questionId; }).indexOf(currentQuestion.id);
+        var newUserAnswer=[...userAnswer];
+        var itemUserAnswer={};
         if(awsActive===0){
             alert('Bạn chưa chọn đáp án!')
             return;
         }
 
-        if(pos<questions.length-1){
-            var itemUserAnswer={};
+        if(pos_awsu !==-1){
+            if(userAnswer[pos_awsu].answerId !==answersCurrentSelected.id){
+                newUserAnswer.splice(pos_awsu,1)
+                itemUserAnswer.id=userAnswer[pos_awsu].id;
+                itemUserAnswer.answerId=answersCurrentSelected.id;
+                itemUserAnswer.questionId=answersCurrentSelected.questionId;
+                itemUserAnswer.answerValue=answersCurrentSelected.content;
+                newUserAnswer.push(itemUserAnswer);
+            }
+        }else{
             itemUserAnswer.id=questions[pos].id;
             itemUserAnswer.answerId=answersCurrentSelected.id;
             itemUserAnswer.questionId=answersCurrentSelected.questionId;
             itemUserAnswer.answerValue=answersCurrentSelected.content;
+            newUserAnswer.push(itemUserAnswer);
+        }
 
-            this.setState({currentQuestion:questions[pos+1], userAnswer:this.state.userAnswer.concat(itemUserAnswer), isNext:true}, ()=>{
+        
+
+        if(pos<questions.length-1){
+            this.setState({currentQuestion:questions[pos+1], userAnswer:newUserAnswer, isNext:true}, ()=>{
                 this.checkQuestionSelected();
             });
         }
