@@ -23,7 +23,8 @@ class Game extends React.Component{
             isNext:true,
             isBack:false,
             awsActive:0,
-            isShowCheck:false
+            isShowCheck:false,
+            duration:0
 
 		};
 	}
@@ -74,7 +75,13 @@ class Game extends React.Component{
             awsActive=userAnswer[pos].answerId;
         }
         var answersCurrentQuestion=this.getListAnswerByQuestionId(questionId);
-        this.setState({currentQuestion:currentQuestion, answersCurrentQuestion:answersCurrentQuestion, awsActive:awsActive, isBack:false, isNext:false})
+        this.setState({currentQuestion:currentQuestion, answersCurrentQuestion:answersCurrentQuestion, awsActive:awsActive, isBack:false, isNext:false, duration:currentQuestion.duration},()=>{
+            this.setTime();
+        })
+    }
+
+    setTime=()=>{
+
     }
 
     getListAnswerByQuestionId=(questionId)=>{
