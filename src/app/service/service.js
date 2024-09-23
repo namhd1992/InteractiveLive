@@ -84,7 +84,7 @@ class Service{
         return this.fetchGetDataWithTokenParams(h, url)
     }
 
-    static getQuestionsInQuiz=()=>{
+    static getInfoQuiz=()=>{
         var gameid=StorageManager.getGameID()
         var h= {...headers};
         h.appId=gameid;
