@@ -50,7 +50,7 @@ class StorageManager{
 
 	static deleteUser = () => {
 		var key=this.getCodeByUrl()
-		StorageManager.deleteItem(`user_${code}`)
+		StorageManager.deleteItem(`user_${key}`)
 		
 	}
 

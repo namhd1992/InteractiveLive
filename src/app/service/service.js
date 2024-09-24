@@ -78,7 +78,7 @@ class Service{
         var h= {...headers};
         h.appId=gameid;
 
-        var url=Ultilities.base_url()+`api/v1/leaderboard/${gameid}/player-honored?`+new URLSearchParams(data), requestOptions;
+        var url=Ultilities.base_url()+`/api/v1/leaderboard/${gameid}/player-honored?`+new URLSearchParams(data), requestOptions;
        
 
         return this.fetchGetDataWithTokenParams(h, url)
@@ -89,37 +89,37 @@ class Service{
         var h= {...headers};
         h.appId=gameid;
 
-        var url=Ultilities.base_url()+`api/v1/quizs/${gameid}`;
+        var url=Ultilities.base_url()+`/api/v1/quizs/${gameid}`;
        
         return this.fetchGetDataWithTokenParams(h, url)
     }
 
 
-    static getStartQuiz=(data)=>{
+    static startQuiz=(data)=>{
         var gameid=StorageManager.getGameID()
         var h= {...headers};
         h.appId=gameid;
 
-        var url=Ultilities.base_url()+`api/v1/quizs/${gameid}/started`;
+        var url=Ultilities.base_url()+`/api/v1/quizs/${gameid}/started`;
        
         return this.fetchData_v2(data, h, url)
     }
 
-    static getAnswersQuestion=(data)=>{
+    static answersQuestion=(data)=>{
         var gameid=StorageManager.getGameID()
         var h= {...headers};
         h.appId=gameid;
 
-        var url=Ultilities.base_url()+`api/v1/quizs/${gameid}/answers`;
+        var url=Ultilities.base_url()+`/api/v1/quizs/${gameid}/answers`;
        
         return this.fetchData_v2(data, h, url)
     }
 
-    static getFinishedQuiz=(data)=>{
+    static finishedQuiz=(data)=>{
         var gameid=StorageManager.getGameID()
         var h= {...headers};
         h.appId=gameid;
-        var url=Ultilities.base_url()+`api/v1/quizs/${gameid}/finished`;
+        var url=Ultilities.base_url()+`/api/v1/quizs/${gameid}/finished`;
        
         return this.fetchData_v2(data, h, url)
     }
@@ -130,17 +130,18 @@ class Service{
         var userId=Auth.getUserId();
         var h= {...headers};
         h.appId=gameid;
-        var url=Ultilities.base_url()+`api/v1/quizs/${gameid}/state/${userId}`;
+        var url=Ultilities.base_url()+`/api/v1/quizs/${gameid}/state/${userId}`;
        
         return this.fetchData_v2(data, h, url)
     }
 
     static getHistoryQuiz=()=>{
-        var gameid=StorageManager.getGameID()
+        var gameid=StorageManager.getGameID();
+        var userId=Auth.getUserId();
         var h= {...headers};
         h.appId=gameid;
 
-        var url=Ultilities.base_url()+`api/v1/quizs/${gameid}/history/${userId}`;
+        var url=Ultilities.base_url()+`/api/v1/quizs/${gameid}/history/${userId}`;
        
         return this.fetchGetDataWithTokenParams(h, url)
     }

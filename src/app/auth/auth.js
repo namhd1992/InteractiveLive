@@ -1,5 +1,4 @@
 import UltilsString from '../ultils/string_ultils.js'
-import Loading from '../ui/loading.js';
 import Service from '../service/service.js';
 import StorageManager from '../ultils/storageManager.js';
 
@@ -25,7 +24,6 @@ class Auth {
             var millisecond = duration + user.expires_in*1000;
             if (millisecond < 0) {
                 StorageManager.deleteUser();
-                // StorageManager.removeItem("user_r");
             }
         }
     }
