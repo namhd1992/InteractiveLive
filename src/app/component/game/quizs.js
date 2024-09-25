@@ -5,7 +5,6 @@ import Service from "../../service/service";
 import StorageManager from "../../ultils/storageManager";
 import { useNavigate } from "react-router-dom";
 
-var intervalQuestion={};
 
 class Quizs extends React.Component{
 
@@ -37,7 +36,6 @@ class Quizs extends React.Component{
             startTime:0,
             endTime:0,
             durationWaitStart:0,
-            durationQuestion:0,
             durationQuiz:"00:00:00",
             intervalQuiz:{}
 		};
@@ -285,7 +283,7 @@ class Quizs extends React.Component{
         return (
            <div style={{display:'flex', flexDirection:'column'}}>
                 <div style={{display:'flex', justifyContent:'center'}}>
-                    <span>{durationQuiz}</span>
+                    <span style={{fontSize:20, fontWeight:'bold'}}>{durationQuiz}</span>
                 </div>
                 <div style={{display:'flex',flexDirection:'column'}}>
                     <div>

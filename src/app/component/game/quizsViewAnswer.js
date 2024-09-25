@@ -29,32 +29,32 @@ class QuizsViewAnswer extends React.Component{
             isBack:false,
             awsActive:0,
             isShowCheck:false,
-            duration:0
+            duration:0,
+            showTimeStart:false,
+            isStartGame:false,
+            startTime:0,
+            endTime:0,
+            durationWaitStart:0,
+            durationQuiz:"00:00:00",
+            intervalQuiz:{}
 		};
 	}
 
     componentDidMount(){
         // this.renArr()
-        Service.getInfoQuiz().then((v)=>{
-            if(v.code>0){
-                var quizzes=v.data.quizzes;
-                var settings=v.data.settings;
-                var questions=v.data.questions;
-                var answers=v.data.answers;
-                answers.map(v=>v.colorAnswer='gray')
-                var userAnswers=v.data.userAnswers ? v.data.userAnswers : [];
-                var embedTypes=v.data.embedTypes;
+        const {dataQuizs}=this.props;
+        var quizzes=dataQuizs.quizzes;
+        var settings=dataQuizs.settings;
+        var questions=dataQuizs.questions;
+        var answers=dataQuizs.answers;
+        answers.map(v=>v.colorAnswer='gray')
+        var userAnswers=dataQuizs.userAnswers ? dataQuizs.userAnswers : [];
+        var embedTypes=dataQuizs.embedTypes;
 
-                this.setState({quizzes:quizzes, questions: questions, answers: answers, userAnswer: userAnswers, embedTypes:embedTypes, settings:settings}, ()=>{
-                    this.checkQuestionSelected();
-                })
-
-            }else{
-                this.setState({quizzes: {}, questions: data_qs, answers: data_aws, userAnswer: data_uaws, embedTypes:[], settings:[], }, ()=>{
-                    this.checkQuestionSelected();
-                })
-            }
+        this.setState({quizzes:quizzes, questions: questions, answers: answers, userAnswer: userAnswers, embedTypes:embedTypes, settings:settings}, ()=>{
+            this.checkStartTime()
         })
+
         if(window.innerWidth < window.innerHeight){
 			this.setState({horizontal: false})
 		}else{
@@ -69,6 +69,26 @@ class QuizsViewAnswer extends React.Component{
 
     componentWillUnmount(){
 
+    }
+
+    checkStartTime=()=>{
+        const {quizzes}=this.state;
+        var _this=this;
+        var t=Date.now()
+        if(quizzes.startTime > t){
+            var intervalWaitStart=setInterval(()=>{	
+                _this.timeRemainWaitStart(quizzes.startTime)
+            }, 1000);
+            this.setState({showTimeStart:true, intervalWaitStart:intervalWaitStart})
+        }
+
+        if(t > quizzes.startTime &&  t < quizzes.endTime){ 
+            this.setState({isStartGame:false})
+        }
+
+        if(t > quizzes.endTime){
+            alert("Game kết thúc")
+        }
     }
 
     checkQuestionSelected=()=>{
@@ -96,14 +116,36 @@ class QuizsViewAnswer extends React.Component{
             awsActive=userAnswer[pos].answerId;
         }
         var answersCurrentQuestion=this.getListAnswerByQuestionId(questionId);
-        this.setState({currentQuestion:currentQuestion, answersCurrentQuestion:answersCurrentQuestion, awsActive:awsActive, isBack:false, isNext:false, duration:currentQuestion.duration},()=>{
-            this.setTime();
-        })
+        this.setState({currentQuestion:currentQuestion, answersCurrentQuestion:answersCurrentQuestion, awsActive:awsActive, isBack:false, isNext:false, duration:currentQuestion.duration})
     }
 
-    setTime=()=>{
+    timeRemainWaitStart=(times)=>{
+        var t=Date.now()
+        var time=(times - t)/1000;
+        if(time>0){
+            var hour=Math.floor((time%86400)/3600) > 9 ? Math.floor((time%86400)/3600) : `0${Math.floor((time%86400)/3600)}`;
+            var minute=Math.floor(((time%86400)%3600)/60) > 9 ? Math.floor(((time%86400)%3600)/60) : `0${Math.floor(((time%86400)%3600)/60)}`;
+            var second=Math.floor(((time%86400)%3600)%60) > 9 ? Math.floor(((time%86400)%3600)%60) : `0${Math.floor(((time%86400)%3600)%60)}`;
+            var time_wait_start=`${hour}:${minute}:${second}`;
+            this.setState({durationWaitStart: time_wait_start})
+        }else{
+            this.setState({isStartGame:true, showTimeStart:false});
+        }
+	}
 
-    }
+    timeRemainQuiz=(times)=>{
+        var t=Date.now()
+        var time=(times - t)/1000;
+        if(time>0){
+            var hour=Math.floor((time%86400)/3600) > 9 ? Math.floor((time%86400)/3600) : `0${Math.floor((time%86400)/3600)}`;
+            var minute=Math.floor(((time%86400)%3600)/60) > 9 ? Math.floor(((time%86400)%3600)/60) : `0${Math.floor(((time%86400)%3600)/60)}`;
+            var second=Math.floor(((time%86400)%3600)%60) > 9 ? Math.floor(((time%86400)%3600)%60) : `0${Math.floor(((time%86400)%3600)%60)}`;
+            var time_end_quiz=`${hour}:${minute}:${second}`;
+            this.setState({durationQuiz: time_end_quiz});
+        }else{
+            this.finished();
+        }
+	}
 
     getListAnswerByQuestionId=(questionId)=>{
         const {answers}=this.state;
@@ -172,12 +214,60 @@ class QuizsViewAnswer extends React.Component{
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
+    finished=()=>{
+        const {intervalQuiz}=this.state;
+        var gameid=StorageManager.getGameID()
+        var data={
+            "quizId":+gameid
+        }
+        clearInterval(intervalQuiz)
+        Service.finishedQuiz(data).then(v=>{
+            if(v.code>0){
+                this.props.navigate(`/bxh?gameid=${gameid}`);
+            }
+        })
+    }
+
+    startQuizs=()=>{
+        const {quizzes}=this.state;
+
+        var gameid=StorageManager.getGameID()
+        var data={
+            "quizId":+gameid
+        }
+        var intervalQuiz=setInterval(()=>{	
+            this.timeRemainQuiz(quizzes.endTime)
+        }, 1000);
+        Service.startQuiz(data).then(v=>{
+            if(v.code>0){
+                this.setState({isStartGame:true, intervalQuiz:intervalQuiz},()=>{
+                    this.checkQuestionSelected();
+                })
+            }
+        })
+    }
+
+
 
     render(){
-        const {currentQuestion, awsActive, isBack, isNext, answersCurrentQuestion}=this.state;
+        const {currentQuestion, awsActive, isBack, isNext, answersCurrentQuestion, showTimeStart, isStartGame, durationStart, durationQuiz}=this.state;
+
+        if(showTimeStart){
+            return (<div style={{display:'flex', justifyContent:'center'}}>
+                <span style={{fontSize:20, fontWeight:'bold'}}>{durationStart}</span>
+            </div>)
+        }
+        if(!isStartGame){
+            return (<div style={{display:'flex', justifyContent:'center'}}>
+                        <span style={{fontSize:20, marginTop:50, cursor:'pointer', backgroundColor:'green', padding:'8px 10px', color:'#fff'}} onClick={this.startQuizs}>Bắt Đầu</span>
+                </div>)
+        }
+
         return (
-           <div style={{display:'flex', flexDirection:'row'}}>
-                <div style={{display:'flex', alignContent:'center'}}>{currentQuestion.duration}</div>
+           <div style={{display:'flex', flexDirection:'column'}}>
+                <div style={{display:'flex', justifyContent:'center'}}>
+                    <span style={{fontSize:20, fontWeight:'bold'}}>{durationQuiz}</span>
+                </div>
                 <div style={{display:'flex',flexDirection:'column'}}>
                     <div>
                         {currentQuestion.imageUrl && <img src={currentQuestion.imageUrl} width="50%"></img>}

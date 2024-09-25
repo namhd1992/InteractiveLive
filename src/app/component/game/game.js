@@ -47,7 +47,7 @@ class Game extends React.Component{
         }
 
         return (<div>
-                {(isShowAnswers===8)?(<QuizsViewAnswer dataQuizs={dataQuizs}></QuizsViewAnswer>):(<Quizs dataQuizs={dataQuizs}></Quizs>)}
+                {(isShowAnswers===2)?(<QuizsViewAnswer dataQuizs={dataQuizs}></QuizsViewAnswer>):(<Quizs dataQuizs={dataQuizs}></Quizs>)}
             </div>
         )
     }
