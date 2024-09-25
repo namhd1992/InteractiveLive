@@ -67,18 +67,14 @@ class Service{
             return this.getAppsettingWithoutToken(h, url)
         }
     }
-
+    // http://103.82.31.215:8028/Interactive_Quiz/api/v1/quizs/{quizId}/top
+    // http://103.82.31.215:8028/Interactive_Quiz/api/v1/quizs/{quizId}/history/{userId}
     static getBXH=()=>{
         var gameid=StorageManager.getGameID()
-        var data= {};
-        data.pageIndex=0;
-        data.pageSize=10;
-        data.fromDate=-1;
-        data.toDate=-1;
         var h= {...headers};
         h.appId=gameid;
 
-        var url=Ultilities.base_url()+`/api/v1/leaderboard/${gameid}/player-honored?`+new URLSearchParams(data), requestOptions;
+        var url=Ultilities.base_url()+`/api/v1/quizs/${gameid}/top`;
        
 
         return this.fetchGetDataWithTokenParams(h, url)

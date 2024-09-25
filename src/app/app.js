@@ -9,21 +9,27 @@ import AuthToken from "./auth/oauthtoken";
 import StorageManager from "./ultils/storageManager";
 import UltilsString from "./ultils/string_ultils";
 import Service from "./service/service";
-
+import notFound from "./component/notFound";
 
 class App extends React.Component{
 
     constructor(props) {
 		super(props);
 		this.state = {
+            gameErr:false
 		};
 	}
 
     componentDidMount(){
-        Auth.checkTimeout();
+        
         var gameid=this.getInfoGame();
+        // if(gameid===null){
+        //     this.setState({gameErr:true});
+        //     return;
+        // }
         StorageManager.setGameID(gameid)
         var infoUser=this.getInfoUser();
+        Auth.checkTimeout();
         if(Auth.isLogin()){
             Service.getInfoGameWithLogin().then(res=>{
                 StorageManager.setAppsetting(res)
@@ -65,9 +71,10 @@ class App extends React.Component{
     
 
     render(){
+        const {gameErr}=this.state;
+
         return (
             <div>
-                <Start />
                 <Router>
                     <Routes>
                         <Route path="/" element={<Game />} />
@@ -81,5 +88,6 @@ class App extends React.Component{
     }
 
 }
+
 
 export default App;

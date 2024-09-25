@@ -25,7 +25,7 @@ class Game extends React.Component{
             if(v.code>0){
                 var dataQuizs=v.data;
                 var quizzes=dataQuizs.quizzes;
-                var isShowAnswers=quizzes.isShowAnswers;
+                var isShowAnswers=quizzes.isShowCheck;
                 this.setState({isLoading:false, dataQuizs: dataQuizs, isShowAnswers:isShowAnswers})
             }
           
@@ -47,7 +47,7 @@ class Game extends React.Component{
         }
 
         return (<div>
-                {(!isShowAnswers)?(<QuizsViewAnswer dataQuizs={dataQuizs}></QuizsViewAnswer>):(<Quizs dataQuizs={dataQuizs}></Quizs>)}
+                {(isShowAnswers===8)?(<QuizsViewAnswer dataQuizs={dataQuizs}></QuizsViewAnswer>):(<Quizs dataQuizs={dataQuizs}></Quizs>)}
             </div>
         )
     }

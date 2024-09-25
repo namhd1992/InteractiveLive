@@ -18,13 +18,13 @@ class StorageManager{
 	}
 
 	static setGameID = (game_id) => {
-		var key=this.getCodeByUrl();
-		StorageManager.setValue(`game_${key}`, game_id)
+		// var key=this.getCodeByUrl();
+		StorageManager.setValue(`gameid`, game_id)
 	}
 
     static getGameID = () => {
-		var key=this.getCodeByUrl();
-		return StorageManager.getValue(`game_${key}`)
+		// var key=this.getCodeByUrl();
+		return StorageManager.getValue(`gameid`)
 	}
 
 
@@ -65,8 +65,8 @@ class StorageManager{
 	static getCodeByUrl = () => {
 		var gameid=UltilsString.parse_query_string('gameid', window.location.href);
 		return gameid;
-
 	}
+
 }
 
 export default StorageManager;
