@@ -267,11 +267,11 @@ class Quizs extends React.Component{
 
 
     render(){
-        const {currentQuestion, awsActive, isBack, isNext, answersCurrentQuestion, showTimeStart, isStartGame, durationStart, durationQuiz}=this.state;
+        const {currentQuestion, awsActive, isBack, isNext, answersCurrentQuestion, showTimeStart, isStartGame, durationWaitStart, durationQuiz}=this.state;
 
         if(showTimeStart){
-            return (<div>
-                <span>{durationStart}</span>
+            return (<div style={{display:'flex', justifyContent:'center'}}>
+                <span style={{fontSize:20, fontWeight:'bold'}}>{durationWaitStart}</span>
             </div>)
         }
         if(!isStartGame){
