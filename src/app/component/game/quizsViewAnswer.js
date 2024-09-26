@@ -3,6 +3,7 @@ import {isMobile, isDesktop, isTablet} from "react-device-detect";
 import {data_qs, data_aws, data_uaws, img} from "../../ultils/data";
 import Service from "../../service/service";
 import StorageManager from "../../ultils/storageManager";
+import { useNavigate } from "react-router-dom";
 
 
 class QuizsViewAnswer extends React.Component{
@@ -36,7 +37,9 @@ class QuizsViewAnswer extends React.Component{
             endTime:0,
             durationWaitStart:0,
             durationQuiz:"00:00:00",
-            intervalQuiz:{}
+            intervalQuiz:{},
+            isAnswer:false,
+            userAnswerStartStop:[]
 		};
 	}
 
@@ -48,10 +51,13 @@ class QuizsViewAnswer extends React.Component{
         var questions=dataQuizs.questions;
         var answers=dataQuizs.answers;
         answers.map(v=>v.colorAnswer='gray')
+        var userAnswers_checkAction=dataQuizs.userAnswers ? dataQuizs.userAnswers : []; 
         var userAnswers=dataQuizs.userAnswers ? dataQuizs.userAnswers : [];
+        userAnswers=userAnswers.filter((v)=>v.actionType===2);
+        var userAnswerStartStop=userAnswers_checkAction.filter((v)=>v.actionType===1);
         var embedTypes=dataQuizs.embedTypes;
 
-        this.setState({quizzes:quizzes, questions: questions, answers: answers, userAnswer: userAnswers, embedTypes:embedTypes, settings:settings}, ()=>{
+        this.setState({quizzes:quizzes, questions: questions, answers: answers, userAnswer: userAnswers, embedTypes:embedTypes, settings:settings, userAnswerStartStop:userAnswerStartStop}, ()=>{
             this.checkStartTime()
         })
 
@@ -72,7 +78,8 @@ class QuizsViewAnswer extends React.Component{
     }
 
     checkStartTime=()=>{
-        const {quizzes}=this.state;
+        const {quizzes, userAnswer, userAnswerStartStop}=this.state;
+        var gameid=StorageManager.getGameID()
         var _this=this;
         var t=Date.now()
         if(quizzes.startTime > t){
@@ -83,7 +90,19 @@ class QuizsViewAnswer extends React.Component{
         }
 
         if(t > quizzes.startTime &&  t < quizzes.endTime){ 
-            this.setState({isStartGame:false})
+            if(userAnswerStartStop.length>0){
+                if(userAnswerStartStop[0].stopEventTime > 163011600000){
+                    this.props.navigate(`/bxh?gameid=${gameid}`);
+                    return;
+                }else{
+                    this.setState({isStartGame:true},()=>{
+                        this.checkQuestionSelected();
+                    })
+                }
+            }else{
+                this.setState({isStartGame:false})
+            }
+            
         }
 
         if(t > quizzes.endTime){
@@ -93,17 +112,20 @@ class QuizsViewAnswer extends React.Component{
 
     checkQuestionSelected=()=>{
         const {questions, answers, userAnswer, isBack, isNext}=this.state;
+        var gameid=StorageManager.getGameID()
         var len=userAnswer.length;
         var awsActive=0;
         var currentQuestion={};
         if(len>0){
-            if(isBack || isNext){
+            if(isNext){
                 currentQuestion=this.state.currentQuestion;
             }else{
                 if(len < questions.length-1){
                     currentQuestion=questions[len+1];
-                }else{
+                }else if(len === questions.length-1){
                     currentQuestion=questions[len-1];
+                }else{
+                    this.props.navigate(`/bxh?gameid=${gameid}`);
                 }
             }
            
@@ -111,15 +133,13 @@ class QuizsViewAnswer extends React.Component{
             currentQuestion=questions[0];
         }
         var questionId=currentQuestion.id;
-        var pos = userAnswer.map(function(e) { return e.questionId; }).indexOf(questionId);
-        if(pos!==-1){
-            awsActive=userAnswer[pos].answerId;
-        }
+
         var answersCurrentQuestion=this.getListAnswerByQuestionId(questionId);
-        this.setState({currentQuestion:currentQuestion, answersCurrentQuestion:answersCurrentQuestion, awsActive:awsActive, isBack:false, isNext:false, duration:currentQuestion.duration})
+        this.setState({currentQuestion:currentQuestion, answersCurrentQuestion:answersCurrentQuestion, isNext:false, duration:currentQuestion.duration})
     }
 
     timeRemainWaitStart=(times)=>{
+        const {intervalWaitStart}=this.state;
         var t=Date.now()
         var time=(times - t)/1000;
         if(time>0){
@@ -129,7 +149,9 @@ class QuizsViewAnswer extends React.Component{
             var time_wait_start=`${hour}:${minute}:${second}`;
             this.setState({durationWaitStart: time_wait_start})
         }else{
-            this.setState({isStartGame:true, showTimeStart:false});
+            this.setState({isStartGame:true, showTimeStart:false},()=>{
+                clearInterval(intervalWaitStart)
+            });
         }
 	}
 
@@ -161,9 +183,20 @@ class QuizsViewAnswer extends React.Component{
     next=()=>{
         const {currentQuestion, questions, awsActive, userAnswer, answersCurrentSelected}=this.state;
         var pos = questions.map(function(e) { return e.id; }).indexOf(currentQuestion.id);
+        var newUserAnswer=[...userAnswer];
+        var itemUserAnswer={};
+        if(answersCurrentSelected.id===undefined){
+            alert('Bạn chưa chọn đáp án');
+            return;
+        }
+        itemUserAnswer.id=questions[pos].id;
+        itemUserAnswer.answerId=answersCurrentSelected.id;
+        itemUserAnswer.questionId=answersCurrentSelected.questionId;
+        itemUserAnswer.answerValue=answersCurrentSelected.content;
+        newUserAnswer.push(itemUserAnswer);
 
         if(pos<questions.length-1){
-            this.setState({currentQuestion:questions[pos+1], isNext:true}, ()=>{
+            this.setState({currentQuestion:questions[pos+1], isNext:true, isAnswer:false, userAnswer:newUserAnswer, answersCurrentSelected:{}}, ()=>{
                 this.checkQuestionSelected();
             });
         }else{
@@ -181,7 +214,7 @@ class QuizsViewAnswer extends React.Component{
     }
 
     selectAnswer=(item)=>{
-        const {currentQuestion, questions, awsActive, userAnswer, answersCurrentSelected, answersCurrentQuestion}=this.state;
+        const {currentQuestion, questions, awsActive, userAnswer, answersCurrentSelected, answersCurrentQuestion, isAnswer}=this.state;
         var newAnswersCurrentQuestion=[...answersCurrentQuestion];
         var pos = newAnswersCurrentQuestion.map(function(e) { return e.id; }).indexOf(item.id);
         var gameid=StorageManager.getGameID()
@@ -190,24 +223,27 @@ class QuizsViewAnswer extends React.Component{
             "questionId": currentQuestion.id,
             "answerId": item.id
         }
-        Service.answersQuestion(data).then(v=>{
-            if(v.code>0){
-                var data=v.data;
-                if(data.isCorrectAnswer){
-                    newAnswersCurrentQuestion[pos].colorAnswer='green';
-                    this.setState({answersCurrentQuestion:newAnswersCurrentQuestion})
+        if(!isAnswer){
+            Service.answersQuestion(data).then(v=>{
+                if(v.code>0){
+                    var data=v.data;
+                    if(data.isCorrectAnswer){
+                        newAnswersCurrentQuestion[pos].colorAnswer='green';
+                        this.setState({answersCurrentQuestion:newAnswersCurrentQuestion, isAnswer:true, answersCurrentSelected:item})
+                    }else{
+                        var answerCorrect=data.answerCorrect;
+                        var idCorrectAnswer=answerCorrect.substring(answerCorrect.indexOf('-')+1);
+                        var pos_correctAnswer = newAnswersCurrentQuestion.map(function(e) { return e.id; }).indexOf(+idCorrectAnswer);
+                        newAnswersCurrentQuestion[pos].colorAnswer='red';
+                        newAnswersCurrentQuestion[pos_correctAnswer].colorAnswer='green';
+                        this.setState({answersCurrentQuestion:newAnswersCurrentQuestion, isAnswer:true, answersCurrentSelected:item})
+                    }
                 }else{
-                    var answerCorrect=data.answerCorrect;
-                    var idCorrectAnswer=answerCorrect.substring(answerCorrect.indexOf('-')+1);
-                    var pos_correctAnswer = newAnswersCurrentQuestion.map(function(e) { return e.id; }).indexOf(+idCorrectAnswer);
-                    newAnswersCurrentQuestion[pos].colorAnswer='red';
-                    newAnswersCurrentQuestion[pos_correctAnswer].colorAnswer='green';
-                    this.setState({answersCurrentQuestion:newAnswersCurrentQuestion})
+    
                 }
-            }else{
-
-            }
-        })
+            })
+        }
+       
     }
 
     randomInteger=(min, max)=> {
@@ -292,4 +328,8 @@ class QuizsViewAnswer extends React.Component{
 
 }
 
-export default QuizsViewAnswer;
+
+export default function (props) {
+    const navigate = useNavigate();
+    return <QuizsViewAnswer {...props} navigate={navigate} />;
+}

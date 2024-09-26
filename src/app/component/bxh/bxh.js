@@ -8,14 +8,15 @@ class BXH extends React.Component{
     constructor(props) {
 		super(props);
 		this.state = {
-            top10:[]
+            top10:[],
+            isLoading:true
 		};
 	}
 
     componentDidMount(){
         Service.getBXH().then(v=>{
             if(v.code>0){
-                console.log(v)
+                this.setState({isLoading:false, top10:v.data.quizResults});
             }
         })
 
@@ -35,12 +36,18 @@ class BXH extends React.Component{
     }
 
     render(){
-        const {top10}=this.state;
+        const {top10, isLoading}=this.state;
+
+        if(isLoading){
+            return <div></div>
+        }
         return (
            <div>
-                {top10.map((obj, index)=>{
-                    <span></span>
-                })}
+                {top10.length>0 && top10.map((item, index) => (
+                        <div key={index} style={{marginBottom:20}}>
+                            <span style={{fontSize:20, fontWeight:'bold'}}>{item.ranking}:{item.username}</span>
+                        </div>
+                ))}
                 <div>
                     <span style={{backgroundColor:'green', color:'#fff', fontSize:20, fontWeight:'bold', padding:'7px 15px', marginRight:10, cursor:'pointer'}} onClick={this.viewHistory}>Xem Lịch Sử</span>
                 </div>

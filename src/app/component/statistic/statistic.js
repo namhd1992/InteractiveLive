@@ -53,7 +53,7 @@ class Statistic extends React.Component{
                 </div>
                 <div style={{marginTop:20}}>
                         {listAnswers.length>0 && listAnswers.map((item, index) => (
-                            <div key={index}>
+                            <div key={index} style={{marginBottom:20}}>
                                 <span style={{marginRight:5}}>{item.questionId}</span>
                                 <span style={item.isCorrectAnswer?{backgroundColor:'green', color:'#fff', padding:'7px 15px'}:{backgroundColor:'red', color:'#fff', padding:'7px 15px'}}>{item.answerValue}</span>
                             </div>
